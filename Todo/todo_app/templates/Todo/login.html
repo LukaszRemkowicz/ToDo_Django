@@ -1,0 +1,15 @@
+{% block content %}
+{% load static %}
+<body>
+
+    <form method="post">
+        {% csrf_token %}
+            {{ form }}
+            <br> Dont have account? Create <a href="{% url 'register' %}"> one </a>
+            <button type="submit" href="{% url 'todo' %}"> SUbmit </button>
+    </form>
+</body>
+
+
+
+{% endblock %}
