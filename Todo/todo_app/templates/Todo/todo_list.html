@@ -33,6 +33,8 @@
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">
+                                {{ form.text }}
+                                {{ form.description }}
 							  <input type="text" class="form-control" placeholder="Enter todo e.g. Delete junk files" aria-label="Todo" aria-describedby="add-btn"
 								 autofocus>
 								 <input type="text" class="form-control" placeholder="Enter todo description" aria-label="Todo" aria-describedby="add-btn"
@@ -70,6 +72,7 @@
 					</ul>
 				</div>
 			</div>
+            <br> Have account? Please <a href="{% url 'log_in' %}">login here </a>
 
 			<footer>
 				<div class="row pad">

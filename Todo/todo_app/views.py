@@ -3,11 +3,17 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from .forms import UserLoginForm, RegisterForm
+from .forms import UserLoginForm, RegisterForm, Todo_list
+
+
+def home(request):
+    return render(request, 'home.html')
 
 
 def todo(request):
-    return render(request, 'todo_list.html')
+    form = Todo_list
+    content = {'form': form}
+    return render(request, 'todo_list.html', content)
 
 
 def log_in(request):
@@ -20,7 +26,9 @@ def log_in(request):
             return redirect('/')
         else:
             login(request, user)
-            return render(request, 'Todo/todo_list.html')
+            form = Todo_list
+            content = {'form': form}
+            return render(request, 'Todo/todo_list.html', content)
     form = UserLoginForm
     return render(request, 'Todo/login.html', {'form': form})
 
@@ -32,9 +40,9 @@ def register(request):
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
-            return redirect('/')
+            return redirect('log_in')
         else:
-            messages.error(request, 'wrong parameters')
+            messages.error(request, form.errors)
     else:
         form = RegisterForm
     return render(request, 'Todo/register.html', {'form': form})

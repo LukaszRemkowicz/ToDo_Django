@@ -1,15 +1,57 @@
 {% block content %}
 {% load static %}
-<body>
 
-    <form method="post">
-        {% csrf_token %}
-            {{ form }}
-            <br> Dont have account? Create <a href="{% url 'register' %}"> one </a>
-            <button type="submit" href="{% url 'todo' %}"> SUbmit </button>
-    </form>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ToDo App</title>
 
+		<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{% static 'todo/bs/css/flatly.min.css' %}" />
+		<link rel="stylesheet" href="{% static 'todo/styles.css'  %}" />
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+        {% include 'message.html' %}
+		<div class="container-fluid" id="wrapper">
+
+			<div class="row">
+				<div class="col-lg-4 col-lg-offset-4" id="content">
+                        {% load widget_tweaks %}
+                        <h2>Sign in to Your Account</h2>
+					    <form method="post">
+                            {% csrf_token %}
+                                {% render_field form.username class+="form-control" placeholder="login" %}
+                                {% render_field form.password class+="form-control" placeholder="password" %}
+                                <button type="submit" href="{% url 'home' %}"> SUbmit </button>
+                        </form>
+                     <br> Dont have account? Create <a href="{% url 'register' %}"> one </a>
+
+
+				</div>
+			</div>
+
+			<footer>
+				<div class="row pad">
+					<div class="col-lg-12 text-center">
+						Copyright &copy; 2017 <strong>ToDo App</strong>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
 
 
 {% endblock %}
