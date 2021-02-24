@@ -29,16 +29,15 @@
 				<div class="col-lg-4 col-lg-offset-4" id="content">
 					<h2>WHAT DO YOU WANT TO DO TODAY?</h2>
 
-					<form action="#" method="POST" role="form">
+					<form action="{% url 'addtodo' %}" method="POST" role="form">
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">
-                                {{ form.text }}
-                                {{ form.description }}
-							  <input type="text" class="form-control" placeholder="Enter todo e.g. Delete junk files" aria-label="Todo" aria-describedby="add-btn"
-								 autofocus>
-								 <input type="text" class="form-control" placeholder="Enter todo description" aria-label="Todo" aria-describedby="add-btn"
-								 autofocus>
+                                <div class="klaska wlasna" style="width: 90%">
+                                {% load widget_tweaks %}
+                                {% render_field form.text class="form-control" placeholder="Enter todo e.g. Delete junk files" aria-label="Todo" aria-describedby="add-btn" %}
+                                {% render_field form.description class="form-control" placeholder="Enter todo description" aria-label="Todo" aria-describedby="add-btn" %}
+                                 </div>
 							  <span class="input-group-btn">
 								  <button type="submit" class="btn btn-default" id="add-btn" style="position: absolute; top: 0px">ADD</button>
 							  </span>
@@ -64,8 +63,15 @@
 					</div>
 
 					<ul class="list-group t20">
+                        {% for todo in todo_list %}
+                            {% if todo %}
+                            	<li class="list-group-item">{{ todo.text }}
+							    <h6>{{ todo.description}}</h6>
+                            {% endif %}
+                        {% endfor %}
+						</li>
 						<li class="list-group-item">Create my new awesome website.
-							<h6>cos tam</h6>
+							<h6>https://www.w3schools.com/css/css_dimension.asp</h6>
 						</li>
 						<li class="list-group-item todo-completed">Attend weekly coding session.</li>
 						<li class="list-group-item">Visit the gym.</li>

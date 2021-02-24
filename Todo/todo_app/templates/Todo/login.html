@@ -34,7 +34,7 @@
                             {% csrf_token %}
                                 {% render_field form.username class+="form-control" placeholder="login" %}
                                 {% render_field form.password class+="form-control" placeholder="password" %}
-                                <button type="submit" href="{% url 'home' %}"> SUbmit </button>
+                                <button type="submit" href="{% url 'home' %}"> Submit </button>
                         </form>
                      <br> Dont have account? Create <a href="{% url 'register' %}"> one </a>
 

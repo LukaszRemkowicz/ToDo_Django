@@ -15,4 +15,4 @@ class RegisterForm(UserCreationForm):
 
 class Todo_list(forms.Form):
     text = forms.CharField(max_length=40)
-    description = forms.CharField(max_length=400)
+    description = forms.CharField(max_length=400, required=False)
