@@ -7,6 +7,8 @@ from django.views.decorators.http import require_POST
 from .forms import UserLoginForm, RegisterForm, Todo_list
 from .models import Profile, Todo
 
+from .decorators import redirect_authorised_user
+
 
 @require_POST
 def addTodo(request):
@@ -16,6 +18,11 @@ def addTodo(request):
         todo = Todo()
         todo.text = request.POST['text']
         todo.description = request.POST['description']
+        todo.link = request.POST['link']
+        if 'https://www.' not in todo.link:
+            todo.link = '//' + todo.link
+        elif 'https://' not in todo.link:
+            todo.link = '//' + todo.link
         todo.user_id = user.id
         # new_todo_text = profile(text=request.POST['text'], user_id=user.id)
         # new_todo_description = profile(description=request.POST['description'], user_id=user.id)
@@ -26,6 +33,7 @@ def addTodo(request):
     return redirect('todo')
 
 
+@redirect_authorised_user
 def home(request):
     return render(request, 'home.html')
 
@@ -38,6 +46,7 @@ def todo(request):
     return render(request, 'Todo/todo_list.html', content)
 
 
+@redirect_authorised_user
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -55,6 +64,7 @@ def log_in(request):
     return render(request, 'Todo/login.html', {'form': form})
 
 
+@redirect_authorised_user
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)

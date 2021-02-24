@@ -17,6 +17,7 @@ class Todo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.CharField(max_length=30, null=True)
     description = models.CharField(max_length=400, null=True)
+    link = models.CharField(max_length=400, null=True)
 
 
     def __str__(self):
