@@ -51,14 +51,18 @@
 						<div class="col-lg-12">
 							<div class="btn-toolbar">
 								<div class="btn-group">
+                                    <a href="{% url 'deleteCompleted' %}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE COMPLETED
 									</button>
+                                    </a>
 								</div>
 								<div class="btn-group">
+                                    <a href="{% url 'deleteall' %}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE ALL
 									</button>
+                                    </a>
 								</div>
 							</div>
 						</div>
@@ -67,23 +71,32 @@
 					<ul class="list-group t20">
                         {% for todo in todo_list %}
                             {% if todo %}
-                            	<li class="list-group-item">
-                                {{ todo.text }}
-                                {% if todo.description %}
-							        <h6>{{ todo.description}}</h6>
-                                {% endif %}
-                                {% if todo.link %}
-                                    <a href={{ todo.link }}>{{ todo.link|slice:'2::' }}</a>
+                                {% if todo.complete %}
+                            	    <li class="list-group-item todo-completed">
+                                        {{ todo.text }}
+                                        {% if todo.description %}
+                                            <h6>{{ todo.description}}</h6>
+                                        {% endif %}
+                                        {% if todo.link %}
+                                            <a href="{{ todo.link }}" style="color: black">{{ todo.link|slice:'2::' }}</a>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <a href="{% url 'complete' todo.id %}" style="color: black">
+                                        <li class="list-group-item">
+                                            {{ todo.text }}
+                                            {% if todo.description %}
+                                                <h6>{{ todo.description}}</h6>
+                                            {% endif %}
+                                            {% if todo.link %}
+                                                <a href="{{ todo.link }}" style="color: black">{{ todo.link|slice:'2::' }}</a>
+                                            {% endif %}
+                                        </li>
+                                    </a>
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
-						</li>
-						<li class="list-group-item">Create my new awesome website.
-							<h6>https://www.w3schools.com/css/css_dimension.asp</h6>
-						</li>
-						<li class="list-group-item todo-completed">Attend weekly coding session.</li>
-						<li class="list-group-item">Visit the gym.</li>
-					</ul>
+                    </ul>
                     <br> Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
 				</div>
 

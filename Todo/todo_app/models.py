@@ -18,7 +18,7 @@ class Todo(models.Model):
     text = models.CharField(max_length=30, null=True)
     description = models.CharField(max_length=400, null=True)
     link = models.CharField(max_length=400, null=True)
-
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text

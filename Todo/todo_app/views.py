@@ -5,9 +5,33 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
 from .forms import UserLoginForm, RegisterForm, Todo_list
-from .models import Profile, Todo
+from .models import Todo
 
 from .decorators import redirect_authorised_user
+
+
+def deleteAll(request):
+    user = User.objects.get(id=request.user.id)
+    todo = Todo.objects.filter(user_id=user.id).delete()
+
+    return redirect('todo')
+
+
+def deleteCompleted(request):
+    user = User.objects.get(id=request.user.id)
+    todo = Todo.objects.filter(complete__exact=True, user_id=user.id).delete()
+
+    return redirect('todo')
+
+
+def completeTodo(request, todo_id):
+    user = User.objects.get(id=request.user.id)
+    todo = Todo.objects.get(pk=todo_id, user_id=user.id)
+    todo.user_id = user.id
+    todo.complete = True
+    todo.save()
+
+    return redirect('todo')
 
 
 @require_POST
@@ -24,12 +48,8 @@ def addTodo(request):
         elif 'https://' not in todo.link:
             todo.link = '//' + todo.link
         todo.user_id = user.id
-        # new_todo_text = profile(text=request.POST['text'], user_id=user.id)
-        # new_todo_description = profile(description=request.POST['description'], user_id=user.id)
-        # new_todo_text.save()
         todo.save()
-        # if request.POST['description']:
-        #     new_todo_description.save()
+
     return redirect('todo')
 
 
