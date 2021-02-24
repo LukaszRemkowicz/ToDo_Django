@@ -1,5 +1,8 @@
-{% block content %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,21 +27,15 @@
 	</head>
 	<body>
         {% include 'message.html' %}
+
 		<div class="container-fluid" id="wrapper">
 
 			<div class="row">
 				<div class="col-lg-4 col-lg-offset-4" id="content">
-                        {% load widget_tweaks %}
-                        <h2>Sign in to Your Account</h2>
-					    <form method="post">
-                            {% csrf_token %}
-                                {% render_field form.username class+="form-control" placeholder="login" %}
-                                {% render_field form.password class+="form-control" placeholder="password" %}
-                                <button type="submit" href="{% url 'home' %}"> Submit </button>
-                        </form>
-                     <br> Dont have account? Create <a href="{% url 'register' %}"> one </a>
-
-
+					<h2>Hello to my todo app. Please choose what you want</h2>
+						
+                    <br>Got account? You can <a href="{% url 'login' %}"> login in</a>
+                    <br>If you dont have one, you can <a href="{% url 'register' %}"> create it </a>
 				</div>
 			</div>
 
@@ -52,6 +49,3 @@
 		</div>
 	</body>
 </html>
-
-
-{% endblock %}
