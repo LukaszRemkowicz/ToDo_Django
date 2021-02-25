@@ -13,6 +13,7 @@
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="{% static 'todo/bs/css/flatly.min.css' %}" />
 		<link rel="stylesheet" href="{% static 'todo/styles.css'  %}" />
+        <link rel="stylesheet" href="{% static 'todo/bs/css/tasks.css' %}">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -67,8 +68,25 @@
 							</div>
 						</div>
 					</div>
+{#                    <div class="container page-todo bootdeys form-group" id="godown">#}
+{#                    <div class="col-sm-7 tasks">#}
+{##}
+{#                            <div class="task high">#}
+{#                                <div class="desc">#}
+{#                                    <div class="title">Lorem Ipsum</div>#}
+{#                                    <div>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit</div>#}
+{#                                </div>#}
+{#                                <div class="time">#}
+{#                                    <div class="date">Jun 1, 2012</div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                    </div>#}
+{#                    </div>#}
 
 					<ul class="list-group t20">
+                    <div class="container page-todo bootdeys form-group" id="godown">
+                    <div class="col-sm-7 tasks" style="margin: -10px 15px -30px -15px">
                         {% for todo in todo_list %}
                             {% if todo %}
                                 {% if todo.complete %}
@@ -82,22 +100,36 @@
                                         {% endif %}
                                     </li>
                                 {% else %}
-                                    <a href="{% url 'complete' todo.id %}" style="color: black">
-                                        <li class="list-group-item">
-                                            {{ todo.text }}
-                                            {% if todo.description %}
-                                                <h6>{{ todo.description}}</h6>
-                                            {% endif %}
-                                            {% if todo.link %}
-                                                <a href="{{ todo.link }}" style="color: black">{{ todo.link|slice:'2::' }}</a>
-                                            {% endif %}
-                                        </li>
-                                    </a>
+                                    <div class="task high">
+                                        <div class="desc">
+                                            <a href="{% url 'complete' todo.id %}" style="color: black">
+                                                <li class="list-group-item">
+                                                    <div class="title">{{ todo.text }}</div>
+                                                    {% if todo.description %}
+                                                        <div><h6>{{ todo.description}}</h6></div>
+                                                    {% endif %}
+                                                    {% if todo.link %}
+                                                        <div><a href="{{ todo.link }}" style="color: black">{{ todo.link|slice:'2::' }}</a></div>
+                                                    {% endif %}
+                                                </li>
+                                            </a>
+                                        </div>
+                                        <div class="time">
+                                            <div class="date">{{ todo.date_added }}</div>
+                                        </div>
+                                    </div>
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
+                    </div>
+
+
+                    </div>
+
                     </ul>
-                    <br> Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
+                <div style="position: relative;">
+                    <br > Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
+                </div>
 				</div>
 
 

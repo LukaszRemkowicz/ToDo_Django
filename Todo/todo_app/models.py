@@ -19,6 +19,7 @@ class Todo(models.Model):
     description = models.CharField(max_length=400, null=True)
     link = models.CharField(max_length=400, null=True)
     complete = models.BooleanField(default=False)
+    date_added = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.text

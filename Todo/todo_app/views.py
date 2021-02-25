@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from .forms import UserLoginForm, RegisterForm, Todo_list
 from .models import Todo
 
-from .decorators import redirect_authorised_user
+from .decorators import redirect_authorised_user, redirect_notauthorised_user
 
 
 def deleteAll(request):
@@ -58,6 +58,7 @@ def home(request):
     return render(request, 'home.html')
 
 
+@redirect_notauthorised_user
 def todo(request):
     form = Todo_list
     user = User.objects.get(id=request.user.id)
