@@ -30,7 +30,7 @@
 				<div class="col-lg-4 col-lg-offset-4" id="content">
 					<h2>WHAT DO YOU WANT TO DO TODAY?</h2>
 
-					<form method="POST" action="{% url 'todo_app:addtodo' %}" >
+					<form method="POST" action="{% url 'todo_app:addtodo' user.username%}?todo={{ todo_name }}" >
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">
@@ -89,12 +89,15 @@
                     <div class="container page-todo bootdeys form-group" id="godown">
                     <div class="col-sm-7 tasks" style="margin: -10px 15px -30px -15px">
                         {% for todo in todo_list %}
-                            {% if todo %}
+
+                            {% if todo and todo.todo_link == todo_name%}
                                 {% if todo.complete %}
                             	    <li class="list-group-item todo-completed">
                                         {{ todo.text }}
                                         {% if todo.description %}
-                                            <h6>{{ todo.description}}</h6>
+                                            <div style="word-wrap: break-word">
+                                                <h6>{{ todo.description}}</h6>
+                                            </div>
                                         {% endif %}
                                         {% if todo.link %}
                                             <a href="{{ todo.link }}" style="color: black">{{ todo.link|slice:'2::' }}</a>
@@ -116,7 +119,7 @@
                                             </a>
                                         </div>
                                         <div class="time">
-                                            <div class="date">{{ todo.date_added }}</div>
+                                            <div class="date" style="word-wrap: break-word">{{ todo.date_added }}</div>
                                         </div>
                                     </div>
                                 {% endif %}
