@@ -30,7 +30,7 @@
 				<div class="col-lg-4 col-lg-offset-4" id="content">
 					<h2>WHAT DO YOU WANT TO DO TODAY?</h2>
 
-					<form action="{% url 'addtodo' %}" method="POST" role="form">
+					<form method="POST" action="{% url 'todo_app:addtodo' %}" >
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">
@@ -47,6 +47,7 @@
 							</div>
 						</div>
 					</form>
+
 
 					<div class="row t10">
 						<div class="col-lg-12">

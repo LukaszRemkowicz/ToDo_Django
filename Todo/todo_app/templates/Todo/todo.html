@@ -1,0 +1,60 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ToDo App</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{% static 'todo/bs/css/flatly.min.css' %}" />
+		<link rel="stylesheet" href="{% static 'todo/styles.css'  %}" />
+        <link rel="stylesheet" href="{% static 'todo/bs/css/tasks.css' %}">
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+
+		<div class="container-fluid" id="wrapper">
+
+			<div class="row">
+				<div class="col-lg-4 col-lg-offset-4" id="content">
+                    <form method="post">
+                        Give the name of your ToDo list:
+                        {% csrf_token %}
+                        <input class="form-control" name="todo_name" placeholder="Enter todo name" aria-label="Todo" aria-describedby="add-btn">
+                        <div>
+                            <button type="submit" class="btn btn-default fixed-bottom">Submit</button>
+                        </div>
+                    </form>
+                <div style="position: relative; width: 80%">
+                    <br > Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
+
+                </div>
+                <div class="position-relative pull-right" style="margin-top: -25px">
+                    download a CSV <a href="{% url 'download_csv' %}"> file </a>
+                </div>
+				</div>
+
+
+			</div>
+
+			<footer>
+				<div class="row pad">
+					<div class="col-lg-12 text-center">
+						Copyright &copy; 2017 <strong>ToDo App</strong>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>

@@ -15,19 +15,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.urls import path, include
+from django.urls import path, include, re_path
 from todo_app import views as todo_view
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', todo_view.home, name='home'),
+    path('home', todo_view.home, name='home'),
     path('login', todo_view.log_in, name='login'),
     path('register/', todo_view.register, name='register'),
     path('todo/', todo_view.todo, name='todo'),
     path('logout', LogoutView.as_view(), name='logout'),
-    path('addtodo', todo_view.addTodo, name='addtodo'),
+    # path('addtodo', include(('todo_app.urls', 'todo_app')), name='addtodo'),
+    # path('addtodo', todo_view.addTodo, name='addtodo'),
     path('complete/<todo_id>', todo_view.completeTodo, name='complete'),
     path('deletecomplete', todo_view.deleteCompleted, name='deleteCompleted'),
     path('deleteall', todo_view.deleteAll, name='deleteall'),
+    path('download_csv', todo_view.download_CSV, name='download_csv'),
+    path('account/', include(('todo_app.urls', 'todo_app')), name='account'),
+    path('create_todo', todo_view.create_todo, name='create_todo'),
+    # re_path(r'^(?P<username>[\w-]+)/$', include(('todo_app.urls', 'todo_app')), name='todolist'),
+
+    #         todo_view.specific_todo_list, name='todolist'),
+    # path('', include(('todo_app.urls', 'todo_app'), namespace='todo_app')),
 ]
