@@ -63,7 +63,7 @@
 
                 </div>
                 <div class="position-relative pull-right" style="margin-top: -25px">
-                    download a CSV <a href="{% url 'download_csv' %}"> file </a>
+                    download a CSV <a href="{% url 'todo_app:download_csv' user.username%}?todo={{ todo_name }}"> file </a>
                 </div>
 				</div>
 			</div>

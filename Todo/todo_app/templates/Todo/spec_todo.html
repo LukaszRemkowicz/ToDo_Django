@@ -53,14 +53,14 @@
 						<div class="col-lg-12">
 							<div class="btn-toolbar">
 								<div class="btn-group">
-                                    <a href="{% url 'deleteCompleted' %}">
+                                    <a href="{% url 'todo_app:deleteCompleted' user.username%}?todo={{ todo_name }}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE COMPLETED
 									</button>
                                     </a>
 								</div>
 								<div class="btn-group">
-                                    <a href="{% url 'deleteall' %}">
+                                    <a href="{% url 'todo_app:deleteall' user.username%}?todo={{ todo_name }}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE ALL
 									</button>
@@ -136,7 +136,7 @@
 
                 </div>
                 <div class="position-relative pull-right" style="margin-top: -25px">
-                    download a CSV <a href="{% url 'download_csv' %}"> file </a>
+                    download a CSV <a href="{% url 'todo_app:download_csv' user.username%}?todo={{ todo_name }}"> file </a>
                 </div>
 				</div>
 
