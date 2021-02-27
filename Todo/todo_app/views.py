@@ -1,16 +1,33 @@
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
-from .forms import UserLoginForm, RegisterForm, Todo_list
+from .forms import UserLoginForm, RegisterForm, Todo_list, ShareForm
 from .models import Todo, Profile
 
 from .decorators import redirect_authorised_user, redirect_notauthorised_user
 
 import csv
+
+
+def sharing_todo(request, username):
+    form = ShareForm
+    todo_name = request.GET.get('todo')
+    if request.method == "POST":
+        if form.is_valid:
+            email_addres = request.POST.get('text')
+            try:
+                user = User.objects.get(email=email_addres)
+            except ObjectDoesNotExist:
+                messages.error(request, f'There is no user with addres email {email_addres}')
+                return redirect(request.META.get('HTTP_REFERER'))
+    content = {'form': form, 'todo_name': todo_name}
+    return render(request, 'Todo/sharing_todo.html', content)
+
 
 
 def download_CSV(request, username):
@@ -82,6 +99,7 @@ def addTodo(request, username):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@redirect_notauthorised_user
 def specific_todo_list(request, username):
     todo_name = request.GET.get('todo')
     form = Todo_list
@@ -91,6 +109,7 @@ def specific_todo_list(request, username):
     return render(request, 'Todo/spec_todo.html', content)
 
 
+@redirect_notauthorised_user
 def create_todo(request):
     user = User.objects.get(id=request.user.id)
     todo = Profile.objects.get(user_id=user.id)
@@ -105,6 +124,7 @@ def create_todo(request):
         return render(request, 'Todo/todo.html')
 
 
+@redirect_notauthorised_user
 def user_account(request):
     user = User.objects.get(id=request.user.id)
     todo_query = Profile.objects.get(user_id=user.id).todo_link
