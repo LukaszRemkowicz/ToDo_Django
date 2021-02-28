@@ -23,25 +23,28 @@
 		<![endif]-->
 	</head>
 	<body>
+        {% include 'message.html' %}
 
 		<div class="container-fluid" id="wrapper">
 
 			<div class="row">
 				<div class="col-lg-4 col-lg-offset-4" id="content">
-                    <form method="post">
-                        Give the name of your ToDo list:
+					<h2>Enter the email address of a user who you want to take privilages to "<b>{{ todo_name }}</b>" list </h2>
+
+					<form action="{% url 'todo_app:delete_sharing' user.username%}?todo={{ todo_name }}" method="POST" role="form">
                         {% csrf_token %}
-                        <input class="form-control" name="todo_name" placeholder="Enter todo name" aria-label="Todo" aria-describedby="add-btn">
-                        <div>
-                            <button type="submit" class="btn btn-default fixed-bottom">Submit</button>
-                        </div>
-                    </form>
-                <div style="position: relative; width: 80%">
-                    <br > Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
-
-                </div>
-
-				</div>
+						<div class="form-group">
+							<div class="input-group center-block">
+                                <div class="klaska wlasna" style="width: 90%">
+                                {% load widget_tweaks %}
+                                {% render_field form.text class="form-control" placeholder="Enter email address" aria-label="Todo" aria-describedby="add-btn" %}
+                                 </div>
+							  <span class="input-group-btn">
+								  <button type="submit" class="btn btn-default" id="add-btn" style="position: absolute; top: 0px">Errase relate</button>
+							  </span>
+							</div>
+						</div>
+					</form>
 
 
 			</div>
