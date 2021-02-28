@@ -1,4 +1,3 @@
-{% block content %}
 {% load static %}
 
 <!DOCTYPE html>
@@ -14,6 +13,7 @@
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="{% static 'todo/bs/css/flatly.min.css' %}" />
 		<link rel="stylesheet" href="{% static 'todo/styles.css'  %}" />
+        <link rel="stylesheet" href="{% static 'todo/bs/css/tasks.css' %}">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,31 +23,30 @@
 		<![endif]-->
 	</head>
 	<body>
+        {% include 'message.html' %}
 
-		<div class="container-fluid " id="wrapper">
-            {% include 'message.html' %}
-
+		<div class="container-fluid" id="wrapper">
 
 			<div class="row">
 				<div class="col-lg-4 col-lg-offset-4" id="content">
-                        {% load widget_tweaks %}
-                        <h2>Please register here</h2>
-					        <form method="post" action="{% url 'register' %}">
-                                {% csrf_token %}
+					<h2>Enter the email address of a user who you want to take privilages to "<b>{{ todo_name }}</b>" list </h2>
 
-                                {% render_field form.username class+="form-control" placeholder="username" %}
-                                {% render_field form.email class+="form-control" placeholder="email" %}
-                                {% render_field form.password1 type="password" class+="form-control" placeholder="Write your password" %}
-                                {% render_field form.password2 type="password" class+="form-control" placeholder="Write your passwort again" %}
+					<form action="{% url 'todo_app:delete_sharing' user.username%}?todo={{ todo_name }}" method="POST" role="form">
+                        {% csrf_token %}
+						<div class="form-group">
+							<div class="input-group center-block">
+                                <div class="klaska wlasna" style="width: 90%">
+                                {% load widget_tweaks %}
+                                {% render_field form.text class="form-control" placeholder="Enter email address" aria-label="Todo" aria-describedby="add-btn" %}
+                                 </div>
+							  <span class="input-group-btn">
+								  <button type="submit" class="btn btn-default" id="add-btn" style="position: absolute; top: 0px">Errase relate</button>
+							  </span>
+							</div>
+						</div>
+					</form>
 
-                                <button type="submit"> Submit </button>
 
-                            </form>
-
-                     <br> Have account? Please <a href="{% url 'login' %}">login here </a>
-
-
-				</div>
 			</div>
 
 			<footer>
@@ -60,6 +59,3 @@
 		</div>
 	</body>
 </html>
-
-
-{% endblock %}
