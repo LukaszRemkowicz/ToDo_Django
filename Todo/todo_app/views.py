@@ -14,9 +14,17 @@ from .decorators import redirect_authorised_user, redirect_notauthorised_user
 import csv
 
 
+def delete_todo(request, username):
+    user = request.user.id
+    todo_id = int(request.GET.get('todo'))
+    todo = Todo.objects.get(id=todo_id, user_id=user).delete()
+
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
 def delete_share(request, username):
     user = User.objects.get(id=request.user.id)
-    todo_post_name = Todo.objects.get(todo_name=request.GET.get('todo'))
+    todo_post_name = Todo.objects.get(todo_name=request.GET.get('todo'), user_id=user.id)
 
     form = ShareForm
 
@@ -35,7 +43,8 @@ def delete_share(request, username):
 
                 except ObjectDoesNotExist:
                     messages.error(request,
-                                   f'There is no relate beetween your Todo List and {user_with_privilages.username}')
+                                   f'There is no relate beetween your "{todo_post_name}" '
+                                   f'List and {user_with_privilages.username}')
                     return redirect('account')
 
             except ObjectDoesNotExist:
@@ -48,6 +57,7 @@ def delete_share(request, username):
 def sharing_todo(request, username):
     form = ShareForm
     todo_name = request.GET.get('todo')
+
     if request.method == "POST":
         if form.is_valid:
             email_addres = request.POST.get('text')
@@ -156,15 +166,16 @@ def specific_todo_list(request, username):
 
 @redirect_notauthorised_user
 def create_todo(request):
+    form = ShareForm
     user = User.objects.get(id=request.user.id)
 
-    if request.method == 'POST':
-        todo = Todo.objects.create(user_id=user.id, todo_name=request.POST.get('todo_name'))
+    if request.method == 'POST' and form.is_valid:
+        todo = Todo.objects.create(user_id=user.id, todo_name=request.POST.get('text'))
 
         return redirect('account')
     else:
-
-        return render(request, 'Todo/todo.html')
+        content = {'form': form}
+        return render(request, 'Todo/todo.html', content)
 
 
 @redirect_notauthorised_user
