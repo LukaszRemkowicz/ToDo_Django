@@ -31,7 +31,8 @@
                     <form method="post">
                         Give the name of your ToDo list:
                         {% csrf_token %}
-                        <input class="form-control" name="todo_name" placeholder="Enter todo name" aria-label="Todo" aria-describedby="add-btn">
+                        {% load widget_tweaks %}
+                        {% render_field form.text class="form-control" name="todo_name" placeholder="Enter todo name" aria-label="Todo" aria-describedby="add-btn" %}
                         <div>
                             <button type="submit" class="btn btn-default fixed-bottom">Submit</button>
                         </div>

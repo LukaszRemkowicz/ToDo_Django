@@ -30,7 +30,7 @@
 				<div class="col-lg-4 col-lg-offset-4" id="content">
 					<h2>WHAT DO YOU WANT TO DO TODAY?</h2>
 
-					<form method="POST" action="{% url 'todo_app:addtodo' user.username%}?todo={{ todo_name }}" >
+					<form method="POST" action="{% url 'todo_app:addtodo' user.username%}?todo={{ todo.id }}" >
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">
@@ -53,14 +53,14 @@
 						<div class="col-lg-12">
 							<div class="btn-toolbar">
 								<div class="btn-group">
-                                    <a href="{% url 'todo_app:deleteCompleted' user.username%}?todo={{ todo_name }}">
+                                    <a href="{% url 'todo_app:deleteCompleted' user.username%}?todo={{ todo.id }}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE COMPLETED
 									</button>
                                     </a>
 								</div>
 								<div class="btn-group">
-                                    <a href="{% url 'todo_app:deleteall' user.username%}?todo={{ todo_name }}">
+                                    <a href="{% url 'todo_app:deleteall' user.username%}?todo={{ todo.id }}">
 									<button type="button" class="btn btn-warning">
 										<i class="glyphicon glyphicon-trash"></i> DELETE ALL
 									</button>
@@ -90,7 +90,7 @@
                     <div class="col-sm-7 tasks" style="margin: -10px 15px -30px -15px">
                         {% for todo in todo_list %}
 
-                            {% if todo and todo.todo_link == todo_name%}
+                            {% if todo %}
                                 {% if todo.complete %}
                             	    <li class="list-group-item todo-completed">
                                         {{ todo.text }}
@@ -106,7 +106,7 @@
                                 {% else %}
                                     <div class="task high">
                                         <div class="desc">
-                                            <a href="{% url 'complete' todo.id %}" style="color: black">
+                                            <a href="{% url 'complete' todo.id %}?todo={{ todo.id }}" style="color: black">
                                                 <li class="list-group-item">
                                                     <div class="title">{{ todo.text }}</div>
                                                     {% if todo.description %}

@@ -14,22 +14,27 @@ class Profile(models.Model):
         return self.user.username
 
 
-class Todo(models.Model):
+class TodoList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+
+class TodoDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.CharField(max_length=30, null=True)
     description = models.CharField(max_length=400, null=True)
     link = models.CharField(max_length=400, null=True)
     complete = models.BooleanField(default=False)
     date_added = models.DateField(auto_now_add=True)
-    todo_name = models.CharField(max_length=100)
+    todo = models.ForeignKey(TodoList, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.todo_name
 
 
 class SharedRelationModel(models.Model):
-    todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
+    todo = models.ForeignKey(TodoList, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.todo
+        return f'{self.user} {self.todo}'

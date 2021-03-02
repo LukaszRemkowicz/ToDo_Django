@@ -20,4 +20,4 @@ class Todo_list(forms.Form):
 
 
 class ShareForm(forms.Form):
-    text = forms.CharField(max_length=70)
+    text = forms.CharField(max_length=70, required=True)
