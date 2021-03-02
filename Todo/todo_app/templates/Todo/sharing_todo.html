@@ -29,9 +29,9 @@
 
 			<div class="row">
 				<div class="col-lg-4 col-lg-offset-4" id="content">
-					<h2>Enter the email address of a friend you want to share the "<b>{{ todo_name }}</b>" list with</h2>
+					<h2>Enter the email address of a friend you want to share the "<b>{{ todo.name }}</b>" list with</h2>
 
-					<form action="{% url 'todo_app:share' user.username%}?todo={{ todo_name }}" method="POST" role="form">
+					<form action="{% url 'todo_app:share' user.username%}?todo={{ todo.id }}" method="POST" role="form">
                         {% csrf_token %}
 						<div class="form-group">
 							<div class="input-group center-block">

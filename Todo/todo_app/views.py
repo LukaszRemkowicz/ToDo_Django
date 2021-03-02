@@ -1,3 +1,5 @@
+from random import randint
+
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -7,24 +9,39 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
 from .forms import UserLoginForm, RegisterForm, Todo_list, ShareForm
-from .models import Todo, SharedRelationModel
+from .models import TodoDetails, SharedRelationModel, TodoList
 
-from .decorators import redirect_authorised_user, redirect_notauthorised_user
+from .decorators import redirect_authorised_user, redirect_notauthorised_user, fake_user
 
 import csv
+
+
+def shared_view(request, username):
+    todo_id = request.GET.get('todo')
+    specific_todo_list(request, request.user)
+    form = Todo_list
+    todolist = TodoDetails.objects.filter(id=todo_id)
+    content = {'form': form, 'todo_list': todolist, 'todo_id': todo_id}
+
+    return render(request, 'Todo/spec_todo.html', content)
 
 
 def delete_todo(request, username):
     user = request.user.id
     todo_id = int(request.GET.get('todo'))
-    todo = Todo.objects.get(id=todo_id, user_id=user).delete()
+    try:
+        todo = TodoDetails.objects.get(id=todo_id, user_id=user).delete()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    except ObjectDoesNotExist:
+        messages.error(request, f'there is no Todo list with ID="{todo_id}"')
+
+        return redirect('account')
 
 
 def delete_share(request, username):
     user = User.objects.get(id=request.user.id)
-    todo_post_name = Todo.objects.get(todo_name=request.GET.get('todo'), user_id=user.id)
+    todo_post_name = TodoDetails.objects.get(todo_name=request.GET.get('todo'), user_id=user.id)
 
     form = ShareForm
 
@@ -56,7 +73,7 @@ def delete_share(request, username):
 
 def sharing_todo(request, username):
     form = ShareForm
-    todo_name = request.GET.get('todo')
+    todo_id = request.GET.get('todo')
 
     if request.method == "POST":
         if form.is_valid:
@@ -64,7 +81,7 @@ def sharing_todo(request, username):
             try:
                 shared_whom = User.objects.get(email=email_addres)
                 user_sharing = User.objects.get(id=request.user.id)
-                todo = Todo.objects.get(user_id=user_sharing, todo_name=todo_name)
+                todo = TodoDetails.objects.get(user_id=user_sharing, todo_id=todo_id)
 
                 try:
                     try_check_db_if_list_shared = SharedRelationModel.objects.get(todo_id=todo.id,
@@ -73,7 +90,7 @@ def sharing_todo(request, username):
                     return redirect('account')
 
                 except ObjectDoesNotExist:
-                    profile = SharedRelationModel.objects.create(todo_id=todo.id,
+                    profile = SharedRelationModel.objects.create(todo_id=todo.todo_id,
                                                                  user_id=shared_whom.id)
                     messages.success(request, 'Succesfull shared')
                     return redirect('account')
@@ -81,7 +98,8 @@ def sharing_todo(request, username):
             except ObjectDoesNotExist:
                 messages.error(request, f'There is no user with addres email {email_addres}')
                 return redirect(request.META.get('HTTP_REFERER'))
-    content = {'form': form, 'todo_name': todo_name}
+    todo = TodoList.objects.get(id=todo_id)
+    content = {'form': form, 'todo': todo}
     return render(request, 'Todo/sharing_todo.html', content)
 
 
@@ -90,7 +108,7 @@ def download_CSV(request, username):
 
     todo_name = request.GET.get('todo')
     user = User.objects.get(id=request.user.id)
-    todo = Todo.objects.filter(user_id=user.id, todo_name=todo_name)
+    todo = TodoDetails.objects.filter(user_id=user.id, todo_name=todo_name)
 
     writer = csv.writer(response)
     writer.writerow(['Todo', 'Todo_Description', 'todo_name', 'Todo_added_date', 'Todo_completed'])
@@ -108,9 +126,9 @@ def download_CSV(request, username):
 
 
 def deleteAll(request, username):
-    todo_name = request.GET.get('todo')
+    todo_id = request.GET.get('todo')
     user = User.objects.get(id=request.user.id)
-    todo = Todo.objects.filter(user_id=user.id, todo_name=todo_name).delete()
+    todo = TodoDetails.objects.filter(user_id=user.id, todo_id=todo_id).delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
@@ -118,15 +136,19 @@ def deleteAll(request, username):
 def deleteCompleted(request, username):
     todo_name = request.GET.get('todo')
     user = User.objects.get(id=request.user.id)
-    todo = Todo.objects.filter(complete__exact=True, user_id=user.id, todo_name=todo_name).delete()
+    todo = TodoDetails.objects.filter(complete__exact=True, user_id=user.id, todo_id=todo_name).delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def completeTodo(request, todo_id):
+@fake_user
+def completeTodo(request, todo_id, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
     todo_name = request.GET.get('todo')
-    user = User.objects.get(id=request.user.id)
-    todo = Todo.objects.get(pk=todo_id, user_id=user.id)
+    todo = TodoDetails.objects.get(pk=todo_id, user_id=user.id)
     todo.user_id = user.id
     todo.complete = True
     todo.save()
@@ -134,33 +156,43 @@ def completeTodo(request, todo_id):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def addTodo(request, username):
-    todo_name = request.GET.get('todo')
+@fake_user
+def addTodo(request, username, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
+    todo_id = request.GET.get('todo')
+    user_todo = TodoList.objects.get(id=int(todo_id))
     form = Todo_list(request.POST)
-    user = User.objects.get(id=request.user.id)
     if form.is_valid():
-        todo = Todo()
-        todo.text = request.POST['text']
-        todo.description = request.POST['description']
-        todo.link = request.POST['link']
-        todo.todo_name = todo_name
-        if 'https://www.' not in todo.link:
-            todo.link = '//' + todo.link
-        elif 'https://' not in todo.link:
-            todo.link = '//' + todo.link
-        todo.user_id = user.id
-        todo.save()
+        text = request.POST['text']
+        description = request.POST['description']
+        link = request.POST['link']
+        if 'https://www.' not in link:
+            link = '//' + link
+        elif 'https://' not in link:
+            link = '//' + link
+        user_id = user.id
+        todo = TodoDetails.objects.create(text=text, description=description,
+                                          link=link, todo_id=user_todo.user_id,
+                                          user_id=user_id)
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@fake_user
 @redirect_notauthorised_user
-def specific_todo_list(request, username):
-    todo_name = request.GET.get('todo')
+def specific_todo_list(request, username, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
+    todo_id = request.GET.get('todo')
     form = Todo_list
-    user = User.objects.get(id=request.user.id)
-    todolist = Todo.objects.filter(user_id=user.id)
-    content = {'form': form, 'todo_list': todolist, 'todo_name': todo_name}
+    todo = TodoList.objects.get(id=int(todo_id))
+    todocontent = TodoDetails.objects.filter(user_id=user.id)
+    content = {'form': form, 'todo_list': todocontent, 'todo_id': todo_id, 'todo': todo}
     return render(request, 'Todo/spec_todo.html', content)
 
 
@@ -170,7 +202,8 @@ def create_todo(request):
     user = User.objects.get(id=request.user.id)
 
     if request.method == 'POST' and form.is_valid:
-        todo = Todo.objects.create(user_id=user.id, todo_name=request.POST.get('text'))
+
+        todo = TodoList.objects.create(user_id=user.id, name=request.POST.get('text'))
 
         return redirect('account')
     else:
@@ -181,9 +214,14 @@ def create_todo(request):
 @redirect_notauthorised_user
 def user_account(request):
     user = User.objects.get(id=request.user.id)
-    todo_query = Todo.objects.filter(user_id=user.id)
-    # todo_list = todo_list.values_list('todo_name')
-    content = {'todo_list': todo_query}
+    todo_query = TodoList.objects.filter(user_id=user.id)
+    shared_todo = SharedRelationModel.objects.filter(user=user.id)
+    list_of_shared_todos = []
+    for shared in shared_todo:
+        todo_shared = TodoList.objects.filter(id=shared.todo_id)
+        list_of_shared_todos.append(todo_shared[0])
+
+    content = {'todo_list': todo_query, 'list_of_shared_todos': list_of_shared_todos}
     return render(request, 'Todo/account.html', content)
 
 

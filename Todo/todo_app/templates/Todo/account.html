@@ -45,20 +45,20 @@
                             {% for todo in todo_list %}
                                 <div>
                                     <br>
-                                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.todo_name }}"> <button type="submit" class="btn btn-warning">
-                                            <i class="glyphicon"></i> {{ todo.todo_name }}
+                                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}"> <button type="submit" class="btn btn-warning">
+                                            <i class="glyphicon"></i> {{ todo.name }}
                                         </button>
                                     </a>
                                 	<div class="btn-group" >
-                                        <a href="{% url 'todo_app:share' user.username%}?todo={{ todo.todo_name }}">
-                                            <button type="submit" name='share_{{ todo.todo_name }}' class="btn btn-warning">
+                                        <a href="{% url 'todo_app:share' user.username%}?todo={{ todo.id }}">
+                                            <button type="submit" name='share_{{ todo.name }}' class="btn btn-warning">
                                                 <i class="glyphicon"></i> SHARE TODO
                                             </button>
                                         </a>
                                     </div>
                                     <div class="btn-group">
                                         <a href="{% url 'todo_app:delete_sharing' user.username%}?todo={{ todo.todo_name }}">
-                                            <button type="submit" name='delete_share_{{ todo.todo_name }}' class="btn btn-warning">
+                                            <button type="submit" name='delete_share_{{ todo.name }}' class="btn btn-warning">
                                                 <i class="glyphicon"></i> DELETE SHARE
                                             </button>
                                         </a>
@@ -72,6 +72,27 @@
                                     </div>
 								</div>
                             {% endfor %}
+
+                        <br>Shared for you:
+                            {% for todo in list_of_shared_todos %}
+                                <div>
+                                    <br>
+                                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}"> <button type="submit" class="btn btn-warning">
+                                            <i class="glyphicon"></i> {{ todo.name }}
+                                        </button>
+                                    </a>
+
+                                    <div class="btn-group">
+                                        <a href="{% url 'todo_app:delete_todo' user.username%}?todo={{ todo.id }}">
+                                            <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
+                                                <i class="glyphicon"></i> DELETE Todo
+                                            </button>
+                                        </a>
+                                    </div>
+
+								</div>
+                            {% endfor %}
+
                         </div>
                             <div style="position: relative; width: 80%">
                             <br > Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
