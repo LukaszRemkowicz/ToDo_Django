@@ -125,23 +125,31 @@ def download_CSV(request, username):
     return response
 
 
-def deleteAll(request, username):
+@fake_user()
+def deleteAll(request, username, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
     todo_id = request.GET.get('todo')
-    user = User.objects.get(id=request.user.id)
     todo = TodoDetails.objects.filter(user_id=user.id, todo_id=todo_id).delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def deleteCompleted(request, username):
+@fake_user()
+def deleteCompleted(request, username, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
     todo_name = request.GET.get('todo')
-    user = User.objects.get(id=request.user.id)
     todo = TodoDetails.objects.filter(complete__exact=True, user_id=user.id, todo_id=todo_name).delete()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@fake_user
+@fake_user(is_it_spec_func=True)
 def completeTodo(request, todo_id, fake_users=None):
     if fake_users:
         user = User.objects.get(id=int(fake_users))
@@ -156,7 +164,7 @@ def completeTodo(request, todo_id, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@fake_user
+@fake_user()
 def addTodo(request, username, fake_users=None):
     if fake_users:
         user = User.objects.get(id=int(fake_users))
@@ -181,7 +189,7 @@ def addTodo(request, username, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@fake_user
+@fake_user()
 @redirect_notauthorised_user
 def specific_todo_list(request, username, fake_users=None):
     if fake_users:
