@@ -8,6 +8,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
+from validate_email import validate_email
+
 from .forms import UserLoginForm, RegisterForm, Todo_list, ShareForm
 from .models import TodoDetails, SharedRelationModel, TodoList
 
@@ -37,6 +39,7 @@ def delete_todo(request, username):
         messages.error(request, f'there is no Todo list with ID="{todo_id}"')
 
         return redirect('account')
+
 
 
 def delete_share(request, username):
@@ -264,15 +267,94 @@ def log_in(request):
     form = UserLoginForm
     return render(request, 'Todo/login.html', {'form': form})
 
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
+from django.core.mail import EmailMessage
+from Todo.settings import DEFAULT_FROM_EMAIL
+from mail.views import EmailThread
+from mail.utils import PasswordResetTokenGenerator
+
+
+def activate_account(request, uidb64, token):
+    try:
+        user_id = force_text(urlsafe_base64_decode(uidb64))
+        messages.success(request, 'Your account has been activated')
+        user = User.objects.get(pk=user_id)
+
+        user.is_active = True
+        user.save()
+
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            messages.info(
+                request, 'Password reset link, is invalid, please request a new one')
+            return render(request, 'mail/register.html')
+
+        return redirect('login')
+
+    except DjangoUnicodeDecodeError as identifier:
+        messages.success(
+            request, 'Invalid link')
+        return render(request, 'mail/reset_mail.html')
+
 
 @redirect_authorised_user
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
+        email = request.POST.get('email')
+        username = request.POST.get('username').lower()
+        password = request.POST.get('password1')
+
+        try:
+            check_email = User.objects.get(email=email)
+            messages.error(request, f'Adress email {email} is not avaiable. User created with that email.')
+            return redirect('register')
+
+        except ObjectDoesNotExist:
+            try:
+                user = User.objects.get(username=username)
+                messages.error(request, f'Username {username} is not avaiable.')
+                return redirect('register')
+
+            except ObjectDoesNotExist:
+                pass
+
+        if not validate_email(email):
+            messages.error(request, 'Please supply a valid email')
+            form = RegisterForm
+            return render(request, 'Todo/registel.html', {'form': form})
+
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
+
+            user = User.objects.create_user(username=username.lower(), email=email)
+            user.set_password(password)
+            user.is_active = False
+
+            user.save()
+
             messages.success(request, f'Account created for {username}!')
+
+            current_site = get_current_site(request)
+            email_subject = 'Account Activation'
+            message = render_to_string('Todo/email_activation.html',
+                                       {
+                                           'domain': current_site.domain,
+                                           'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                                           'token': PasswordResetTokenGenerator().make_token(user)
+                                       }
+                                       )
+            email_message = EmailMessage(
+                email_subject,
+                message,
+                DEFAULT_FROM_EMAIL,
+                [email]
+            )
+            EmailThread(email_message).start()
+            messages.success(request, 'We have sent you an email to activate your account')
+
             return redirect('login')
         else:
             messages.error(request, form.errors)

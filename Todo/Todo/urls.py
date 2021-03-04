@@ -34,6 +34,7 @@ urlpatterns = [
     # path('download_csv', todo_view.download_CSV, name='download_csv'),
     path('account/', todo_view.user_account, name='account'),
     path('create_todo', todo_view.create_todo, name='create_todo'),
+    path('activate_account/<uidb64>/<token>', todo_view.activate_account, name='activate_account'),
 
     #         todo_view.specific_todo_list, name='todolist'),
     # path('', include(('todo_app.urls', 'todo_app'), namespace='todo_app')),
