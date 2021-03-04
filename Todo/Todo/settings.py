@@ -44,7 +44,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,6 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'todo_app',
     'widget_tweaks',
+    'mailer',
+    'mail',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,23 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+'''Email config'''
+
+DEFAULT_FROM_EMAIL = os.getenv('MAIL_FROM')
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#
+# EMAIL_HOST_WIN = os.getenv('EMAIL_HOST_WIN')
+# EMAIL_PORT_WIN = os.getenv('EMAIL_PORT_WIN')
+# EMAIL_HOST_USER_WIN = os.getenv('EMAIL_HOST_USER_WIN')
+# EMAIL_HOST_PASSWORD_WIN = os.getenv('EMAIL_HOST_PASSWORD_WIN')
+
+
+"""Sendgrid conf"""
+
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+EMAIL_HOST = os.getenv('EMAIL_ADMIN_HOST')
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_SENDGRID_USER')
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
