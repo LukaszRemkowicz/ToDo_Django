@@ -17,15 +17,26 @@
             <link rel="stylesheet" href="{% static 'todo/styles.css' %}"/>
             <link rel="stylesheet" href="{% static 'todo/bs/css/tasks.css' %}">
 
+
+
+
         {% endblock %}
+
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
         {%  block scripts %}
 
+            <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+
 			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
 			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+
+
+
+
 		<![endif]-->
 
         {% endblock %}
@@ -33,8 +44,9 @@
 
 </head>
     <body style="background-color: lightslategrey">
-    {% include 'message.html' %}
-
+    <div>
+        {% include 'message.html' %}
+    </div>
 
     <div class="container-fluid wrapp" id="wrapper">
 

@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
     {% load static %}
-    {% include 'message.html' %}
 
     {% load widget_tweaks %}
-    {% include 'message.html' %}
 
     <h2>Enter the email address of a friend you want to share the "<b>{{ todo.name }}</b>" list with</h2>
 
@@ -13,7 +11,7 @@
         <div class="form-group">
             <div class="input-group center-block">
                 <div class="klaska wlasna" style="width: 90%">
-                    {% load widget_tweaks %}
+
                     {% render_field form.text class="form-control" placeholder="Enter email address" aria-label="Todo" aria-describedby="add-btn" %}
                 </div>
                 <span class="input-group-btn">
