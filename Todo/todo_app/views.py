@@ -1,33 +1,33 @@
-from random import randint
-
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
+from django.core.mail import EmailMessage
 
 from validate_email import validate_email
 
 from .forms import UserLoginForm, RegisterForm, Todo_list, ShareForm
 from .models import TodoDetails, SharedRelationModel, TodoList
-
+from Todo.settings import DEFAULT_FROM_EMAIL
+from mail.views import EmailThread
+from mail.utils import PasswordResetTokenGenerator
 from .decorators import redirect_authorised_user, redirect_notauthorised_user, fake_user
 
 import csv
 
 
-def shared_view(request, username):
-    todo_id = request.GET.get('todo')
-    specific_todo_list(request, request.user)
-    form = Todo_list
-    todolist = TodoDetails.objects.filter(id=todo_id)
-    content = {'form': form, 'todo_list': todolist, 'todo_id': todo_id}
-
-    return render(request, 'Todo/spec_todo.html', content)
+def shared_list(request, username):
+    return render(request, 'Todo/shared_list.html')
 
 
+@redirect_notauthorised_user
 def delete_todo(request, username):
     user = request.user.id
     todo_id = int(request.GET.get('todo'))
@@ -41,10 +41,10 @@ def delete_todo(request, username):
         return redirect('account')
 
 
-
+@redirect_notauthorised_user
 def delete_share(request, username):
     user = User.objects.get(id=request.user.id)
-    todo_post_name = TodoDetails.objects.get(todo_name=request.GET.get('todo'), user_id=user.id)
+    todo_post_name = TodoList.objects.get(id=int(request.GET.get('todo')), user_id=user.id)
 
     form = ShareForm
 
@@ -74,6 +74,7 @@ def delete_share(request, username):
     return render(request, 'Todo/take_share.html', content)
 
 
+@redirect_notauthorised_user
 def sharing_todo(request, username):
     form = ShareForm
     todo_id = request.GET.get('todo')
@@ -84,7 +85,7 @@ def sharing_todo(request, username):
             try:
                 shared_whom = User.objects.get(email=email_addres)
                 user_sharing = User.objects.get(id=request.user.id)
-                todo = TodoDetails.objects.get(user_id=user_sharing, todo_id=todo_id)
+                todo = TodoList.objects.get(user_id=user_sharing.id, id=int(todo_id))
 
                 try:
                     try_check_db_if_list_shared = SharedRelationModel.objects.get(todo_id=todo.id,
@@ -93,24 +94,31 @@ def sharing_todo(request, username):
                     return redirect('account')
 
                 except ObjectDoesNotExist:
-                    profile = SharedRelationModel.objects.create(todo_id=todo.todo_id,
+                    profile = SharedRelationModel.objects.create(todo_id=todo.id,
                                                                  user_id=shared_whom.id)
+                    todo.shared = True
+                    todo.save()
                     messages.success(request, 'Succesfull shared')
                     return redirect('account')
 
             except ObjectDoesNotExist:
                 messages.error(request, f'There is no user with addres email {email_addres}')
                 return redirect(request.META.get('HTTP_REFERER'))
-    todo = TodoList.objects.get(id=todo_id)
+    todo = TodoList.objects.get(id=int(todo_id))
     content = {'form': form, 'todo': todo}
     return render(request, 'Todo/sharing_todo.html', content)
 
 
-def download_CSV(request, username):
+@fake_user
+def download_CSV(request, username, fake_users=None):
+    if fake_users:
+        user = User.objects.get(id=int(fake_users))
+    else:
+        user = User.objects.get(id=request.user.id)
+
     response = HttpResponse(content='text/csv')
 
     todo_name = request.GET.get('todo')
-    user = User.objects.get(id=request.user.id)
     todo = TodoDetails.objects.filter(user_id=user.id, todo_name=todo_name)
 
     writer = csv.writer(response)
@@ -237,20 +245,6 @@ def user_account(request):
 
 
 @redirect_authorised_user
-def home(request):
-    return render(request, 'home.html')
-
-
-# @redirect_notauthorised_user
-# def todo(request):
-#     form = Todo_list
-#     user = User.objects.get(id=request.user.id)
-#     todolist = Todo.objects.filter(user_id=user.id)
-#     content = {'form': form, 'todo_list': todolist}
-#     return render(request, 'Todo/todo_list.html', content)
-
-
-@redirect_authorised_user
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -263,19 +257,9 @@ def log_in(request):
             login(request, user)
             form = Todo_list
             content = {'form': form}
-            return render(request, 'home.html', content)
+            return render(request, 'Todo/account.html', content)
     form = UserLoginForm
     return render(request, 'Todo/login.html', {'form': form})
-
-from django.contrib.sites.shortcuts import get_current_site
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
-from django.core.mail import EmailMessage
-from Todo.settings import DEFAULT_FROM_EMAIL
-from mail.views import EmailThread
-from mail.utils import PasswordResetTokenGenerator
 
 
 def activate_account(request, uidb64, token):

@@ -17,6 +17,7 @@ class Profile(models.Model):
 class TodoList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    shared = models.BooleanField(default=False)
 
 
 class TodoDetails(models.Model):

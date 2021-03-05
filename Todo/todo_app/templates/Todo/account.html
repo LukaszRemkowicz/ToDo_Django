@@ -1,120 +1,94 @@
-{% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>ToDo App</title>
-
-		<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="{% static 'todo/bs/css/flatly.min.css' %}" />
-		<link rel="stylesheet" href="{% static 'todo/styles.css'  %}" />
-        <link rel="stylesheet" href="{% static 'todo/bs/css/tasks.css' %}">
-
-		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
-			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-		<![endif]-->
-	</head>
-	<body>
+{% extends 'base.html' %}
+{% block content %}
+    {% load static %}
     {% include 'message.html' %}
-		<div class="container-fluid" id="wrapper">
 
-			<div class="row">
-				<div class="col-lg-4 col-lg-offset-4" id="content">
-					<h2>WHAT DO YOU WANT TO DO TODAY?</h2>
+    <h2>WHAT DO YOU WANT TO DO TODAY?</h2>
 
-					<div class="row t10">
-						<div class="">
-							<div class="">
-								<div class="">
-                                    <a href="{% url 'create_todo' %}">
-									<button type="button" class="btn btn-warning">
-										<i class="glyphicon glyphicon-trash"></i> ADD NEW TODO
-									</button>
-                                    </a>
-								</div>
-							</div>
-                            <br>Your Todo lists:
-                            {% for todo in todo_list %}
-                                <div>
-                                    <br>
-                                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}"> <button type="submit" class="btn btn-warning">
-                                            <i class="glyphicon"></i> {{ todo.name }}
-                                        </button>
-                                    </a>
-                                	<div class="btn-group" >
-                                        <a href="{% url 'todo_app:share' user.username%}?todo={{ todo.id }}">
-                                            <button type="submit" name='share_{{ todo.name }}' class="btn btn-warning">
-                                                <i class="glyphicon"></i> SHARE TODO
-                                            </button>
-                                        </a>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="{% url 'todo_app:delete_sharing' user.username%}?todo={{ todo.todo_name }}">
-                                            <button type="submit" name='delete_share_{{ todo.name }}' class="btn btn-warning">
-                                                <i class="glyphicon"></i> DELETE SHARE
-                                            </button>
-                                        </a>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="{% url 'todo_app:delete_todo' user.username%}?todo={{ todo.id }}">
-                                            <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
-                                                <i class="glyphicon"></i> DELETE Todo
-                                            </button>
-                                        </a>
-                                    </div>
-								</div>
-                            {% endfor %}
-
-                        <br>Shared for you:
-                            {% for todo in list_of_shared_todos %}
-                                <div>
-                                    <br>
-                                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}"> <button type="submit" class="btn btn-warning">
-                                            <i class="glyphicon"></i> {{ todo.name }}
-                                        </button>
-                                    </a>
-
-                                    <div class="btn-group">
-                                        <a href="{% url 'todo_app:delete_todo' user.username%}?todo={{ todo.id }}">
-                                            <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
-                                                <i class="glyphicon"></i> DELETE Todo
-                                            </button>
-                                        </a>
-                                    </div>
-
-								</div>
-                            {% endfor %}
-
+    <div class="row t10">
+        <div class="">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <a href="{% url 'create_todo' %}">
+                        <button type="button" class="btn btn-warning" style="background-color:rgba(53,111,170,0.98) ;border-color: rgba(53,111,170,0.98)">
+                            <i class="glyphicon glyphicon-info-sign"></i> ADD NEW TODO
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <br>Your Todo lists:
+            {% for todo in todo_list %}
+                <div>
+                    <br>
+                    <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="glyphicon"></i> {{ todo.name }}
+                        </button>
+                    </a>
+                    <div class="btn-group">
+                        <a href="{% url 'todo_app:share' user.username %}?todo={{ todo.id }}">
+                            <button type="submit" name='share_{{ todo.name }}' class="btn btn-warning">
+                                <i class="glyphicon"></i> SHARE TODO
+                            </button>
+                        </a>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{% url 'todo_app:delete_sharing' user.username %}?todo={{ todo.id }}">
+                            <button type="submit" name='delete_share_{{ todo.name }}' class="btn btn-warning">
+                                <i class="glyphicon"></i> DELETE SHARE
+                            </button>
+                        </a>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{% url 'todo_app:delete_todo' user.username %}?todo={{ todo.id }}">
+                            <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
+                                <i class="glyphicon"></i> DELETE TODO
+                            </button>
+                        </a>
+                    </div>
+                    {% if todo.shared %}
+                        <div class="btn-group">
+                            <a href="{% url 'todo_app:shared_list' user.username %}?todo={{ todo.id }}">
+                                <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-info"
+                                        style="background-color: #4cae4c; border-color: #4cae4c;">
+                                    <i class="glyphicon glyphicon-info-sign color"></i> TODO SHARED
+                                </button>
+                            </a>
                         </div>
-                            <div style="position: relative; width: 80%">
-                            <br > Click here if you wanna <a href="{% url 'logout' %}">logout  </a>
+                    {% endif %}
 
-                            </div>
-                            <div class="position-relative pull-right" style="margin-top: -25px">
-                                download a CSV <a href="{% url 'todo_app:download_csv' user.username%}?todo={{ todo_name }}"> file </a>
-                            </div>
-                            </div>
-						</div>
+                </div>
+            {% endfor %}
 
-					</div>
+            {% if list_of_shared_todos %}
+                <br>Shared for you:
+                {% for todo in list_of_shared_todos %}
+                    <div>
+                        <br>
+                        <a href="{% url 'todo_app:todolist' user.username %}?todo={{ todo.id }}">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="glyphicon"></i> {{ todo.name }}
+                            </button>
+                        </a>
 
-			</div>
+                        <div class="btn-group">
+                            <a href="{% url 'todo_app:delete_todo' user.username %}?todo={{ todo.id }}">
+                                <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
+                                    <i class="glyphicon"></i> DELETE TODO
+                                </button>
+                            </a>
+                        </div>
 
-			<footer>
-				<div class="row pad">
-					<div class="col-lg-12 text-center">
-						Copyright &copy; 2017 <strong>ToDo App</strong>
-					</div>
-				</div>
-			</footer>
-		</div>
-	</body>
-</html>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+        </div>
+        <div style="position: relative; width: 80%">
+            <br> Click here if you wanna <a href="{% url 'logout' %}">logout </a>
+
+        </div>
+
+    </div>
+
+{% endblock %}

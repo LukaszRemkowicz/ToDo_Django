@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from . import views
 from .views import addTodo, specific_todo_list, user_account, deleteCompleted, deleteAll, \
-    download_CSV, sharing_todo, delete_share, delete_todo, shared_view
+    download_CSV, sharing_todo, delete_share, delete_todo, shared_list
 
 urlpatterns = [
     # path('', views.log_in, name='login'),
@@ -17,6 +17,7 @@ urlpatterns = [
     re_path(r'share/(?P<username>[\w-]+)/$', sharing_todo, name='share'),
     re_path(r'delete_sharing/(?P<username>[\w-]+)/$', delete_share, name='delete_sharing'),
     re_path(r'delete_todo/(?P<username>[\w-]+)/$', delete_todo, name='delete_todo'),
-    re_path(r'shared_view/(?P<username>[\w-]+)/$', shared_view, name='shared_view'),
+    # re_path(r'shared_view/(?P<username>[\w-]+)/$', shared_view, name='shared_view'),
+    re_path(r'shared_list/(?P<username>[\w-]+)/$', shared_list, name='shared_list'),
 
 ]

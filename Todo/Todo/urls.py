@@ -21,7 +21,7 @@ from todo_app import views as todo_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('mail.urls')),
-    path('home', todo_view.home, name='home'),
+    # path('home', todo_view.home, name='home'),
     path('', todo_view.log_in, name='login'),
     path('register/', todo_view.register, name='register'),
     # path('todo/', todo_view.todo, name='todo'),

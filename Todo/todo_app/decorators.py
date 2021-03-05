@@ -18,7 +18,7 @@ def redirect_authorised_user(func):
 def redirect_notauthorised_user(func):
     def wrapper_unauth_user(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('home')
+            return redirect('login')
         else:
             return func(request, *args, **kwargs)
 
