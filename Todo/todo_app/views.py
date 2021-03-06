@@ -9,22 +9,33 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
-from django.core.mail import EmailMessage
+from django.utils.html import escape
+from django.core.mail import send_mail
 
 from validate_email import validate_email
 
 from .forms import UserLoginForm, RegisterForm, Todo_list, ShareForm
 from .models import TodoDetails, SharedRelationModel, TodoList
-from Todo.settings import DEFAULT_FROM_EMAIL
-from mail.views import EmailThread
 from mail.utils import PasswordResetTokenGenerator
 from .decorators import redirect_authorised_user, redirect_notauthorised_user, fake_user
+from Todo.settings import DEFAULT_FROM_EMAIL
 
 import csv
 
 
 def shared_list(request, username):
-    return render(request, 'Todo/shared_list.html')
+    todo_id = int(request.GET.get('todo'))
+    todos = SharedRelationModel.objects.filter(todo=todo_id)
+    todos_list = []
+
+    for todo in todos:
+        user = User.objects.get(id=todo.user_id)
+        todos_list.append(user.email)
+
+    content = {'todos': todos_list,
+               'todo_id': todo_id}
+
+    return render(request, 'Todo/shared_list.html', content)
 
 
 @redirect_notauthorised_user
@@ -32,7 +43,7 @@ def delete_todo(request, username):
     user = request.user.id
     todo_id = int(request.GET.get('todo'))
     try:
-        todo = TodoDetails.objects.get(id=todo_id, user_id=user).delete()
+        todo = TodoList.objects.get(id=todo_id, user_id=user).delete()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
     except ObjectDoesNotExist:
@@ -56,8 +67,10 @@ def delete_share(request, username):
 
                 try:
 
-                    relation = SharedRelationModel.objects.get(todo__todo_name=todo_post_name,
+                    relation = SharedRelationModel.objects.get(todo__name=todo_post_name.name,
                                                                user__id=user_with_privilages.id).delete()
+                    todo_post_name.shared = False
+                    todo_post_name.save()
                     messages.success(request, 'Succesfull deleted related')
                     return redirect('account')
 
@@ -185,16 +198,16 @@ def addTodo(request, username, fake_users=None):
     user_todo = TodoList.objects.get(id=int(todo_id))
     form = Todo_list(request.POST)
     if form.is_valid():
-        text = request.POST['text']
-        description = request.POST['description']
-        link = request.POST['link']
+        text = escape(request.POST['text'])
+        description = escape(request.POST['description'])
+        link = escape(request.POST['link'])
         if 'https://www.' not in link:
             link = '//' + link
         elif 'https://' not in link:
             link = '//' + link
         user_id = user.id
         todo = TodoDetails.objects.create(text=text, description=description,
-                                          link=link, todo_id=user_todo.user_id,
+                                          link=link, todo_id=user_todo.id,
                                           user_id=user_id)
 
     return redirect(request.META.get('HTTP_REFERER'))
@@ -210,7 +223,7 @@ def specific_todo_list(request, username, fake_users=None):
     todo_id = request.GET.get('todo')
     form = Todo_list
     todo = TodoList.objects.get(id=int(todo_id))
-    todocontent = TodoDetails.objects.filter(user_id=user.id)
+    todocontent = TodoDetails.objects.filter(user_id=user.id, todo_id=int(todo_id))
     content = {'form': form, 'todo_list': todocontent, 'todo_id': todo_id, 'todo': todo}
     return render(request, 'Todo/spec_todo.html', content)
 
@@ -222,7 +235,7 @@ def create_todo(request):
 
     if request.method == 'POST' and form.is_valid:
 
-        todo = TodoList.objects.create(user_id=user.id, name=request.POST.get('text'))
+        todo = TodoList.objects.create(user_id=user.id, name=escape(request.POST.get('text')))
 
         return redirect('account')
     else:
@@ -248,6 +261,11 @@ def user_account(request):
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('username')
+        user = User.objects.get(username=username)
+        if not user.is_active:
+            messages.info(request, 'Your account is not active. '
+                                   'Please go to your email box and find email with activation link')
+            return redirect('/')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if not user:
@@ -288,9 +306,9 @@ def activate_account(request, uidb64, token):
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
-        email = request.POST.get('email')
-        username = request.POST.get('username').lower()
-        password = request.POST.get('password1')
+        email = escape(request.POST.get('email'))
+        username = escape(request.POST.get('username').lower())
+        password = escape(request.POST.get('password1'))
 
         try:
             check_email = User.objects.get(email=email)
@@ -330,13 +348,15 @@ def register(request):
                                            'token': PasswordResetTokenGenerator().make_token(user)
                                        }
                                        )
-            email_message = EmailMessage(
-                email_subject,
-                message,
-                DEFAULT_FROM_EMAIL,
-                [email]
+
+            send_mail(
+                subject=email_subject,
+                message='',
+                from_email=DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                html_message=message
             )
-            EmailThread(email_message).start()
+
             messages.success(request, 'We have sent you an email to activate your account')
 
             return redirect('login')
