@@ -17,6 +17,7 @@ class Profile(models.Model):
 class TodoList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    shared = models.BooleanField(default=False)
 
 
 class TodoDetails(models.Model):
@@ -29,7 +30,7 @@ class TodoDetails(models.Model):
     todo = models.ForeignKey(TodoList, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.todo_name
+        return f'{self.todo}'
 
 
 class SharedRelationModel(models.Model):

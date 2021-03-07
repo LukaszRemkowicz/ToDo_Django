@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'todo_app',
     'widget_tweaks',
-    'mailer',
+    # 'mailer',
     'mail',
 ]
 

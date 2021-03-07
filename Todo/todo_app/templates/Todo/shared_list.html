@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>THIS LIST IS SHARED TO:</h2>
+
+
+<div>
+
+{% for email in todos %}
+    {% if email %}
+        <br> {{ email }}
+    {% endif %}
+{% endfor %}
+
+</div>
+
+    <a href="{% url 'todo_app:delete_sharing' user.username %}?todo={{ todo_id }}">
+         <button type="submit" class="btn btn-info">
+             <i class="glyphicon"></i> CLICK HERE TO DELETE SHARE FOR USER
+         </button>
+    </a>
+
+    <div class="btn-group">
+        <a href="{% url 'account' %}">
+            <button type="button" class="btn btn-info" style="background-color:rgba(53,111,170,0.98) ;border-color: rgba(53,111,170,0.98)">
+                <i class="glyphicon glyphicon-arrow-left"></i> GO BACK TO ACCOUNT PAGE
+            </button>
+        </a>
+    </div>
+
+
+{% endblock %}
