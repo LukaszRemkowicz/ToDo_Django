@@ -30,7 +30,7 @@ class TodoDetails(models.Model):
     todo = models.ForeignKey(TodoList, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.todo_name
+        return f'{self.todo}'
 
 
 class SharedRelationModel(models.Model):

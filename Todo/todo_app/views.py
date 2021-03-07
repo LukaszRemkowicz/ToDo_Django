@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -23,14 +25,31 @@ from Todo.settings import DEFAULT_FROM_EMAIL
 import csv
 
 
+@redirect_notauthorised_user
+def delete_view_share(request, username):
+    todo_id = int(request.GET.get('todo'))
+    user = request.user.id
+    todo = SharedRelationModel.objects.get(todo=todo_id, user=user).delete()
+    todo = SharedRelationModel.objects.filter(todo=todo_id)
+    if not todo:
+        todo = TodoList.objects.get(id=todo_id)
+        todo.shared = False
+        todo.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
 def shared_list(request, username):
     todo_id = int(request.GET.get('todo'))
     todos = SharedRelationModel.objects.filter(todo=todo_id)
     todos_list = []
 
     for todo in todos:
-        user = User.objects.get(id=todo.user_id)
-        todos_list.append(user.email)
+        try:
+            user = User.objects.get(id=todo.user_id)
+            todos_list.append(user.email)
+        except ObjectDoesNotExist:
+            todo.delete()
+            pass
 
     content = {'todos': todos_list,
                'todo_id': todo_id}
@@ -56,7 +75,6 @@ def delete_todo(request, username):
 def delete_share(request, username):
     user = User.objects.get(id=request.user.id)
     todo_post_name = TodoList.objects.get(id=int(request.GET.get('todo')), user_id=user.id)
-
     form = ShareForm
 
     if request.method == "POST":
@@ -69,7 +87,9 @@ def delete_share(request, username):
 
                     relation = SharedRelationModel.objects.get(todo__name=todo_post_name.name,
                                                                user__id=user_with_privilages.id).delete()
-                    todo_post_name.shared = False
+                    relation = SharedRelationModel.objects.filter(todo=int(request.GET.get('todo')))
+                    if not relation:
+                        todo_post_name.shared = False
                     todo_post_name.save()
                     messages.success(request, 'Succesfull deleted related')
                     return redirect('account')
@@ -95,6 +115,9 @@ def sharing_todo(request, username):
     if request.method == "POST":
         if form.is_valid:
             email_addres = request.POST.get('text')
+            if email_addres == request.user.email:
+                messages.error(request, f'You cannot share Todo to yourself')
+                return redirect(request.META.get('HTTP_REFERER'))
             try:
                 shared_whom = User.objects.get(email=email_addres)
                 user_sharing = User.objects.get(id=request.user.id)
@@ -122,7 +145,8 @@ def sharing_todo(request, username):
     return render(request, 'Todo/sharing_todo.html', content)
 
 
-@fake_user
+@redirect_notauthorised_user
+@fake_user()
 def download_CSV(request, username, fake_users=None):
     if fake_users:
         user = User.objects.get(id=int(fake_users))
@@ -132,23 +156,31 @@ def download_CSV(request, username, fake_users=None):
     response = HttpResponse(content='text/csv')
 
     todo_name = request.GET.get('todo')
-    todo = TodoDetails.objects.filter(user_id=user.id, todo_name=todo_name)
+    todo = TodoDetails.objects.filter(user_id=user.id, todo_id=todo_name)
 
     writer = csv.writer(response)
-    writer.writerow(['Todo', 'Todo_Description', 'todo_name', 'Todo_added_date', 'Todo_completed'])
+    writer.writerow(['Todo', 'Todo_Description', 'Link', 'Todo_added_date', 'Todo_completed'])
     for todo in todo.values_list('text', 'description', 'link', 'date_added', 'complete'):
         todo_elements = list(todo)
-        if todo_elements[2] == '//':
-            todo_elements[2] = ''
-        elif todo_elements[0] == '//':
-            todo_elements
-        writer.writerow(todo_elements)
+        copy_list = []
+        for col in todo_elements:
+            if isinstance(col, datetime.date) or isinstance(col, bool):
+                copy_list.append(col)
+            elif col == '//':
+                copy_list.append('')
+            elif ';' in col:
+                rep = col.replace(';', ' ').replace(',', ' ')
+                copy_list.append(rep)
+            else:
+                copy_list.append(col)
+        writer.writerow(copy_list)
 
     response['Content-Disposition'] = 'attachment; filename="to_list.csv"'
 
     return response
 
 
+@redirect_notauthorised_user
 @fake_user()
 def deleteAll(request, username, fake_users=None):
     if fake_users:
@@ -161,6 +193,7 @@ def deleteAll(request, username, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@redirect_notauthorised_user
 @fake_user()
 def deleteCompleted(request, username, fake_users=None):
     if fake_users:
@@ -173,6 +206,7 @@ def deleteCompleted(request, username, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@redirect_notauthorised_user
 @fake_user(is_it_spec_func=True)
 def completeTodo(request, todo_id, fake_users=None):
     if fake_users:
@@ -188,6 +222,7 @@ def completeTodo(request, todo_id, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
+@redirect_notauthorised_user
 @fake_user()
 def addTodo(request, username, fake_users=None):
     if fake_users:
@@ -213,8 +248,8 @@ def addTodo(request, username, fake_users=None):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@fake_user()
 @redirect_notauthorised_user
+@fake_user()
 def specific_todo_list(request, username, fake_users=None):
     if fake_users:
         user = User.objects.get(id=int(fake_users))
@@ -261,17 +296,18 @@ def user_account(request):
 def log_in(request):
     if request.method == 'POST':
         username = request.POST.get('username')
-        user = User.objects.get(username=username)
-        if not user.is_active:
-            messages.info(request, 'Your account is not active. '
-                                   'Please go to your email box and find email with activation link')
-            return redirect('/')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if not user:
             messages.info(request, 'username OR password is incorrect')
             return redirect('/')
+
         else:
+            if not user.is_active:
+                messages.info(request, 'Your account is not active. '
+                                       'Please go to your email box and find email with activation link')
+                return redirect('/')
+
             login(request, user)
             form = Todo_list
             content = {'form': form}

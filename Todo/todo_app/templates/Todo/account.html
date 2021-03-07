@@ -71,9 +71,9 @@
                         </a>
 
                         <div class="btn-group">
-                            <a href="{% url 'todo_app:delete_todo' user.username %}?todo={{ todo.id }}">
-                                <button type="submit" name='delete_todo_{{ todo.id }}' class="btn btn-warning">
-                                    <i class="glyphicon"></i> DELETE TODO
+                            <a href="{% url 'todo_app:delete_view_share' user.username %}?todo={{ todo.id }}">
+                                <button type="submit" name='delete_share_{{ todo.name }}' class="btn btn-warning">
+                                    <i class="glyphicon"></i> DELETE SHARE
                                 </button>
                             </a>
                         </div>

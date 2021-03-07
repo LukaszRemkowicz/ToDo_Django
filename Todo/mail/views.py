@@ -4,16 +4,13 @@ from validate_email import validate_email
 from django.shortcuts import render, redirect
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
+from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
-
 from django.contrib.auth.models import User
 
 from Todo.settings import DEFAULT_FROM_EMAIL
-
-from django.conf import settings
-
 from .forms import NewPasswordForm
 
 if "mailer" in settings.INSTALLED_APPS:
